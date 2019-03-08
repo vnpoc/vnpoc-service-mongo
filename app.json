@@ -1,0 +1,19 @@
+{
+  "addons": [
+
+  ],
+  "buildpacks": [
+
+  ],
+  "description": "Description",
+  "env": {
+  },
+  "formation": {
+  },
+  "name": "vnpoc-service-mongo",
+  "scripts": {
+    "postdeploy": "post-deploy",
+    "pr-predestroy": "pre-destroy"
+  },
+  "stack": "heroku-18"
+}
