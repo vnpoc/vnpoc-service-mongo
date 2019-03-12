@@ -1,8 +1,24 @@
-package poc;
+package poc.asset;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.hateoas.Identifiable;
 
-public class Asset {	
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class Asset implements Identifiable<String> {	
+    @JsonCreator
+	public Asset(@JsonProperty("name") String name,
+			@JsonProperty("identifier") String identifier,
+			@JsonProperty("description") String description,
+			@JsonProperty("value") String value) {
+    	super();
+    	this.name = name;
+    	this.identifier = identifier;
+    	this.description = description;
+    	this.value = value;		
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -33,6 +49,12 @@ public class Asset {
 	public void setParent(String parent) {
 		this.parent = parent;
 	}
+
+	@Override
+	public String getId() {
+		return id;
+	}
+
 	//=======================================================================
 	// ATRIBUTOS
 	//=======================================================================

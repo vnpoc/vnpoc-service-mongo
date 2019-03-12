@@ -1,4 +1,4 @@
-package poc;
+package poc.asset;
 
 import java.util.List;
 
@@ -8,9 +8,9 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 @CrossOrigin(origins = "*")
-@RepositoryRestResource(collectionResourceRel = "entities", path = "entities")
-public interface EntityRepository extends MongoRepository<Entity, String> {
+@RepositoryRestResource(collectionResourceRel = "assets", path = "assets")
+public interface AssetRepository extends MongoRepository<Asset, String> {
 
-	List<Entity> findByIdentifier(@Param("identifier") String identifier);
-
+	List<Asset> findByParent(@Param("parent") String parent);
+	List<Asset> findByValue(@Param("value") String value);
 }
