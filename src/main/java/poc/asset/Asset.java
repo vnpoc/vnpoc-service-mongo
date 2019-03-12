@@ -55,6 +55,14 @@ public class Asset implements Identifiable<String> {
 		return id;
 	}
 
+	public void modifica(Asset asset) {
+    	if (asset.name != null) this.name = asset.name;
+    	if (asset.identifier != null) this.identifier = asset.identifier;
+    	if (asset.description != null) this.description = asset.description;
+    	if (asset.value != null) this.value = asset.value;		
+    	if (asset.parent != null) this.parent = asset.parent;		
+	}
+	
 	//=======================================================================
 	// ATRIBUTOS
 	//=======================================================================

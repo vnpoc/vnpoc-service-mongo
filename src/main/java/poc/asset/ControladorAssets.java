@@ -5,6 +5,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,12 +32,13 @@ import poc.Contador;
 //===========================================================================
 @CrossOrigin(origins = "*")
 @RestController
+@RequestMapping(value = "/assets", produces = "application/json") 
 public class ControladorAssets {
 
 	// ----------------------------------------------------------------------
 	// get (GET /assets?parent=parent)
 	// ----------------------------------------------------------------------
-	@RequestMapping(method = RequestMethod.GET, value = "/assets", produces = "application/json")
+	@RequestMapping(method = RequestMethod.GET, value = "")
 	public HttpEntity<Resources<ResourceSupport>> getAssets(@RequestParam(name="parent", required = false) String parent) {
 		List<Asset> lista;
 		Resources<ResourceSupport> resul;
@@ -51,9 +55,19 @@ public class ControladorAssets {
 	}
 
 	// ----------------------------------------------------------------------
+	// get (GET /assets/{id})
+	// ----------------------------------------------------------------------
+	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    public HttpEntity<ResourceSupport> get(@PathVariable final String id) {
+		Optional<Asset> asset = bdAssets.findById(id);
+		ResourceSupport resul = toRecurso(asset.orElse(new Asset("NO ENCONTRADO", "", "", "")));
+		return new ResponseEntity<>(resul, HttpStatus.OK);
+    }
+	
+	// ----------------------------------------------------------------------
 	// get (GET /assets/values)
 	// ----------------------------------------------------------------------
-	@RequestMapping(method = RequestMethod.GET, value = "/assets/values", produces = "application/json")
+	@RequestMapping(method = RequestMethod.GET, value = "/values")
 	public HttpEntity<Resources<Entry<String,Long>>> getValues() {
 		Contador contador = new Contador();
 		List<Asset> assets = bdAssets.findAll();
@@ -67,6 +81,25 @@ public class ControladorAssets {
 		resul = new Resources<Entry<String, Long>>(contador.entrySet());
 		resul.add(linkTo(methodOn(ControladorAssets.class).getAssets("parent")).withSelfRel());
 		resul.add(linkTo(methodOn(ControladorAssets.class).getValues()).withSelfRel());
+		return new ResponseEntity<>(resul, HttpStatus.OK);
+	}
+
+	// ----------------------------------------------------------------------
+	// modifica (PUT /assets/{id})
+	// ----------------------------------------------------------------------
+	@RequestMapping(method = RequestMethod.PUT, value="/{id}")
+	public HttpEntity<ResourceSupport> modifica(@PathVariable String id,
+			@RequestBody Asset asset) {
+		Optional<Asset> ent = bdAssets.findById(id);
+		ResourceSupport resul = null;
+		
+		TRAZA.info("modifica - asset nuevo: " + asset);
+		if (ent.isPresent()) {
+			ent.get().modifica(asset);
+			TRAZA.info("modifica - asset modificado: " + ent.get());
+			resul = toRecurso(ent.get());
+			bdAssets.save(ent.get());
+		}
 		return new ResponseEntity<>(resul, HttpStatus.OK);
 	}
 

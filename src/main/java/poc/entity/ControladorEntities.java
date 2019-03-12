@@ -102,7 +102,7 @@ public class ControladorEntities {
 			bdEntities.save(ent.get());
 		}
 		return new ResponseEntity<>(resul, HttpStatus.OK);
-}
+	}
 	
 	// ----------------------------------------------------------------------
 	// toRecurso
