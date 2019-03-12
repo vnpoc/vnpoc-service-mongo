@@ -109,9 +109,12 @@ public class ControladorAssets {
     private ResourceSupport toRecurso(Asset asset) {
     	ResourceSupport resul = new Resource<>(asset);
     	resul = new Resource<>(asset);
-		resul.add(linkTo(methodOn(ControladorAssets.class).getAssets(asset.getParent())).withSelfRel());
+		resul.add(linkTo(methodOn(ControladorAssets.class).get(asset.getId())).withSelfRel());
+		resul.add(linkTo(methodOn(ControladorAssets.class).getAssets(asset.getParent())).withRel("parent"));
+		resul.add(linkTo(methodOn(ControladorAssets.class).
+				modifica(asset.getId(), asset)).withRel("modifica"));
 		resul.add(linkTo(methodOn(ControladorAssets.class).getValues()).withRel("values"));
-    	return resul;
+		return resul;
     }
  
     //===========================================================================
