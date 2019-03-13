@@ -1,13 +1,9 @@
 package poc.entity;
 
 import static java.util.stream.Collectors.toList;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.List;
-import java.util.Map.Entry;
 
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import poc.Contador;
-import poc.asset.ControladorAssets;
 
 //===========================================================================
 //CLASE ControladorEntities
@@ -37,21 +29,18 @@ import poc.asset.ControladorAssets;
 public class ControladorEntities {
 
 	// ----------------------------------------------------------------------
-	// get (GET /entities?identifier=11111111A)
+	// get (GET /entities)
 	// ----------------------------------------------------------------------
 	@RequestMapping(method = RequestMethod.GET, value = "")
-	public HttpEntity<Resources<ResourceSupport>> getEntities(@RequestParam(name="identifier", required = false) String identifier) {
+	public HttpEntity<Resources<ResourceSupport>> getEntities() {
 		List<Entity> entidades;
 		Resources<ResourceSupport> resul;
 		
-		if (identifier == null)
-			entidades = bdEntities.findAll();
-		else
-			entidades = bdEntities.findByIdentifier(identifier);
-		TRAZA.info("getEntities (" + identifier + "): " + entidades.size());
+		entidades = bdEntities.findAll();
+		TRAZA.info("getEntities: " + entidades.size());
 		resul = new Resources<ResourceSupport> (entidades.stream().map(this::toRecurso).collect(toList())); 
-		resul.add(linkTo(methodOn(ControladorEntities.class).getEntities(identifier)).withSelfRel());
-		resul.add(linkTo(methodOn(ControladorEntities.class).getOrigins()).withRel("origins"));
+		// resul.add(linkTo(methodOn(ControladorEntities.class).getEntities()).withSelfRel());
+		// resul.add(linkTo(methodOn(ControladorEntities.class).getOrigins()).withRel("origins"));
 		return new ResponseEntity<>(resul, HttpStatus.OK);
 	}
 
@@ -60,46 +49,50 @@ public class ControladorEntities {
 	// ----------------------------------------------------------------------
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}")
     public HttpEntity<ResourceSupport> get(@PathVariable final String id) {
-		Optional<Entity> entidad = bdEntities.findById(id);
-		ResourceSupport resul = toRecurso(entidad.orElse(new Entity("NO ENCONTRADO", "", "", "")));
-		return new ResponseEntity<>(resul, HttpStatus.OK);
+		List<Entity> entidades = bdEntities.findByIdentifier(id);
+		ResourceSupport resul;
+		HttpEntity<ResourceSupport> resp;
+		
+		if (entidades.size() > 0) {
+			resul = toRecurso(entidades.get(0));
+			resp = new ResponseEntity<>(resul, HttpStatus.OK);
+		} else {
+			resul = toRecurso(new Entity("NO ENCONTRADO", "", "", ""));
+			resp = new ResponseEntity<>(resul, HttpStatus.NOT_FOUND);
+		}
+		return resp;
     }
 	
 	// ----------------------------------------------------------------------
-	// get (GET /entities/origins)
+	// pon (POST /entities)
 	// ----------------------------------------------------------------------
-	@RequestMapping(method = RequestMethod.GET, value = "/origins")
-	public HttpEntity<Resources<Entry<String,Long>>> getOrigins() {
-		Contador contador = new Contador();
-		List<Entity> entities = bdEntities.findAll();
-		Resources<Entry<String,Long>> resul;
-		
-		TRAZA.info("getValues: GET /entities/origins");
-		for (Entity entity: entities) {
-			contador.pon(entity.getOrigin());
-		}
-		TRAZA.info("getValues: GET /entities/origins: " + contador);
-		resul = new Resources<Entry<String, Long>>(contador.entrySet());
-		resul.add(linkTo(methodOn(ControladorEntities.class).getEntities("identifier")).withSelfRel());
-		resul.add(linkTo(methodOn(ControladorEntities.class).getOrigins()).withRel("origins"));
-		return new ResponseEntity<>(resul, HttpStatus.OK);
-	}
-
-	// ----------------------------------------------------------------------
-	// modificaEntidad (PUT /entities/{id})
-	// ----------------------------------------------------------------------
-	@RequestMapping(method = RequestMethod.PUT, value="/{id}")
-	public HttpEntity<ResourceSupport> modificaEntidad(@PathVariable String id,
-			@RequestBody Entity entidad) {
-		Optional<Entity> ent = bdEntities.findById(id);
+	@RequestMapping(method = RequestMethod.POST, value="")
+	public HttpEntity<ResourceSupport> pon(@RequestBody Entity entidad) {
 		ResourceSupport resul = null;
 		
-		TRAZA.info("modificaEntidad - entidad nueva: " + entidad);
-		if (ent.isPresent()) {
-			ent.get().modifica(entidad);
-			TRAZA.info("modificaEntidad - entidad modificada: " + ent.get());
-			resul = toRecurso(ent.get());
-			bdEntities.save(ent.get());
+		TRAZA.info("pon - entidad nueva: " + entidad);
+		bdEntities.save(entidad);
+		resul = toRecurso(entidad);
+		return new ResponseEntity<>(resul, HttpStatus.OK);
+	}
+	
+	// ----------------------------------------------------------------------
+	// modifica (PUT /entities/{id})
+	// ----------------------------------------------------------------------
+	@RequestMapping(method = RequestMethod.PUT, value="/{id}")
+	public HttpEntity<ResourceSupport> modifica(@PathVariable String id,
+			@RequestBody Entity entidad) {
+		List<Entity> entidades = bdEntities.findByIdentifier(id);
+		Entity ent;
+		ResourceSupport resul = null;
+		
+		TRAZA.info("modifica - entidad nueva: " + entidad);
+		if (entidades.size() > 0) {
+			ent = entidades.get(0);
+			ent.modifica(entidad);
+			TRAZA.info("modifica - entidad modificada: " + ent);
+			resul = toRecurso(ent);
+			bdEntities.save(ent);
 		}
 		return new ResponseEntity<>(resul, HttpStatus.OK);
 	}
@@ -110,11 +103,14 @@ public class ControladorEntities {
     private ResourceSupport toRecurso(Entity entity) {
     	ResourceSupport resul = new Resource<>(entity);
     	resul = new Resource<>(entity);
+    	/*
 		resul.add(linkTo(methodOn(ControladorEntities.class).get(entity.getId())).withSelfRel());
 		resul.add(linkTo(methodOn(ControladorEntities.class).getEntities(entity.getIdentifier())).withRel("identifier"));
+		resul.add(linkTo(methodOn(ControladorEntities.class).pon(entity)).withRel("pon"));
 		resul.add(linkTo(methodOn(ControladorEntities.class).
-				modificaEntidad(entity.getId(), entity)).withRel("modifica"));
+				modifica(entity.getId(), entity)).withRel("modifica"));
 		resul.add(linkTo(methodOn(ControladorAssets.class).getAssets(entity.getId())).withRel("assets"));
+		*/
     	return resul;
     }
  

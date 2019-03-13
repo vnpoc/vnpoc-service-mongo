@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @RepositoryRestResource(collectionResourceRel = "assets", path = "assets")
 public interface AssetRepository extends MongoRepository<Asset, String> {
 
+	List<Asset> findByIdentifier(@Param("identifier") String identifier);
 	List<Asset> findByParent(@Param("parent") String parent);
 	List<Asset> findByValue(@Param("value") String value);
 }
