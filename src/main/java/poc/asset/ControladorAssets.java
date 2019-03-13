@@ -2,6 +2,7 @@ package poc.asset;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 //===========================================================================
-//CLASE ControladorEntities
+//CLASE ControladorAssets
 //===========================================================================
 @CrossOrigin(origins = "*")
 @RestController
@@ -32,16 +32,16 @@ public class ControladorAssets {
 	// get (GET /assets)
 	// ----------------------------------------------------------------------
 	@RequestMapping(method = RequestMethod.GET, value = "")
-	public HttpEntity<Resources<ResourceSupport>> getAssets() {
-		List<Asset> lista;
-		Resources<ResourceSupport> resul;
+	public HttpEntity<Collection<ResourceSupport>> getAssets() {
+		Collection<Asset> lista;
+		Collection<ResourceSupport> resul;
 		
 		TRAZA.info("getAssets: GET /assets");
 		lista = bdAssets.findAll();
-		resul = new Resources<ResourceSupport> (lista.stream().map(this::toRecurso).collect(toList()));
+		resul = lista.stream().map(this::toRecurso).collect(toList());
 		// resul.add(linkTo(methodOn(ControladorAssets.class).getAssets(parent)).withSelfRel());
 		// resul.add(linkTo(methodOn(ControladorAssets.class).getValues()).withSelfRel());
-		return new ResponseEntity<Resources<ResourceSupport>>(resul, HttpStatus.OK);
+		return new ResponseEntity<Collection<ResourceSupport>>(resul, HttpStatus.OK);
 	}
 
 	// ----------------------------------------------------------------------

@@ -1,15 +1,10 @@
 package poc.entity.asset;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.List;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +18,10 @@ import poc.asset.Asset;
 import poc.asset.AssetRepository;
 
 //===========================================================================
-//CLASE ControladorEntities
+//CLASE ControladorEntitiesAssets
 //===========================================================================
 @RestController
-@CrossOrigin(origins = "*", methods = {RequestMethod.PUT, RequestMethod.GET})
+@CrossOrigin(origins = "*")
 @RequestMapping(value = "/entities", produces = "application/json") 
 public class ControladorEntitiesAssets {
 
@@ -34,24 +29,13 @@ public class ControladorEntitiesAssets {
 	// get (GET /entities/{id}/assets)
 	// ----------------------------------------------------------------------
 	@RequestMapping(method = RequestMethod.GET, value = "/{id}/assets")
-	public HttpEntity<Resources<ResourceSupport>> getAssets(@PathVariable final String id) {
-		List<Asset> assets = bdAssets.findByParent(id);
-		Resources<ResourceSupport> resul;
+	public HttpEntity<Collection<Asset>> getAssets(@PathVariable final String id) {
+		Collection<Asset> assets = bdAssets.findByParent(id);
 		
 		TRAZA.info("getAssets: " + assets.size());
-		resul = new Resources<ResourceSupport> (assets.stream().map(this::toRecurso).collect(toList())); 
-		return new ResponseEntity<>(resul, HttpStatus.OK);
+		return new ResponseEntity<>(assets, HttpStatus.OK);
     }
 	 
-	// ----------------------------------------------------------------------
-	// toRecurso
-	// ----------------------------------------------------------------------
-    private ResourceSupport toRecurso(Asset asset) {
-    	ResourceSupport resul = new Resource<>(asset);
-    	resul = new Resource<>(asset);
-    	return resul;
-    }
-
     //===========================================================================
     // ATRIBUTOS
     //===========================================================================

@@ -2,6 +2,7 @@ package poc.entity;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,13 +32,13 @@ public class ControladorEntities {
 	// get (GET /entities)
 	// ----------------------------------------------------------------------
 	@RequestMapping(method = RequestMethod.GET, value = "")
-	public HttpEntity<Resources<ResourceSupport>> getEntities() {
-		List<Entity> entidades;
-		Resources<ResourceSupport> resul;
+	public HttpEntity<Collection<ResourceSupport>> getEntities() {
+		Collection<Entity> entidades;
+		Collection<ResourceSupport> resul;
 		
 		entidades = bdEntities.findAll();
 		TRAZA.info("getEntities: " + entidades.size());
-		resul = new Resources<ResourceSupport> (entidades.stream().map(this::toRecurso).collect(toList())); 
+		resul = entidades.stream().map(this::toRecurso).collect(toList()); 
 		// resul.add(linkTo(methodOn(ControladorEntities.class).getEntities()).withSelfRel());
 		// resul.add(linkTo(methodOn(ControladorEntities.class).getOrigins()).withRel("origins"));
 		return new ResponseEntity<>(resul, HttpStatus.OK);
