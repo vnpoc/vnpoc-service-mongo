@@ -44,6 +44,12 @@ public class ControladorStatus {
 			estado.pon(Propiedad.Tipo.ASSET, asset.getValue());
 		}
 		TRAZA.info("get: GET /status: " + estado);
+		TRAZA.info("get: GET /status me duermo un rato");
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		resul = estado.propiedades();
 		return new ResponseEntity<>(resul, HttpStatus.OK);
 	}
