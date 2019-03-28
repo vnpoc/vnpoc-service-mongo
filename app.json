@@ -1,19 +1,7 @@
 {
-  "addons": [
-
-  ],
-  "buildpacks": [
-
-  ],
-  "description": "Probando",
-  "env": {
-  },
-  "formation": {
-  },
-  "name": "vnpoc-service-mongo",
-  "scripts": {
-    "postdeploy": "post-deploy",
-    "pr-predestroy": "pre-destroy"
-  },
-  "stack": "heroku-18"
+  "name": "Spring Boot",
+  "description": "This is a small demo application.",
+  "website": "https://blog.codecentric.de/en/2015/10/deploying-spring-boot-applications-to-heroku",
+  "repository": "https://github.com/vnpoc/vnpoc-service-mongo",
+  "image": "heroku/java"
 }
